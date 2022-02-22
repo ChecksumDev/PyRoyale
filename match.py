@@ -15,7 +15,7 @@ class Match(object):
         self.votes = int()
         self.winners = int()
         self.lastId = -1
-        self.players = list()
+        self.players = []
 
     def getNextPlayerId(self):
         self.lastId += 1
@@ -53,10 +53,7 @@ class Match(object):
             self.start()
 
     def getPlayer(self, pid):
-        for player in self.players:
-            if player.id == pid:
-                return player
-        return None
+        return next((player for player in self.players if player.id == pid), None)
             
     def getWinners(self):
         self.winners += 1
@@ -102,12 +99,11 @@ class Match(object):
             ], "type": "s01"})
 
     def getPlayersData(self):
-        playersData = []
-        for player in self.players:
-            if not player.loaded or player.dead:
-                continue
-            playersData.append(player.getSimpleData())
-        return playersData
+        return [
+            player.getSimpleData()
+            for player in self.players
+            if player.loaded and not player.dead
+        ]
 
     def onPlayerReady(self, player):
         if not self.playing: # Ensure that the game starts even with fewer players
