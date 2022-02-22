@@ -311,13 +311,13 @@ class MyServerFactory(WebSocketServerFactory):
                                "server.cfg"), "r") as f:
             self.configHash = hashlib.md5(f.read()).hexdigest()
         self.readConfig(self.configHash)
-        
+
         WebSocketServerFactory.__init__(self, url.format(self.listenPort))
 
-        self.players = list()
-        self.matches = list()
-        
-        self.curse = list()
+        self.players = []
+        self.matches = []
+
+        self.curse = []
         try:
             with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    "words.json"), "r") as f:
@@ -325,7 +325,7 @@ class MyServerFactory(WebSocketServerFactory):
         except:
             pass
 
-        self.blocked = list()
+        self.blocked = []
         try:
             with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    "blocked.json"), "r") as f:
@@ -394,7 +394,7 @@ class MyServerFactory(WebSocketServerFactory):
         return False
 
     def blockAddress(self, address, playerName, reason):
-        if not address in self.blocked:
+        if address not in self.blocked:
             self.blocked.append([address, playerName, reason])
             try:
                 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -404,11 +404,7 @@ class MyServerFactory(WebSocketServerFactory):
                 pass
 
     def getPlayerCountByAddress(self, address):
-        count = 0
-        for player in self.players:
-            if player.client.address == address:
-                count += 1
-        return count
+        return sum(player.client.address == address for player in self.players)
 
     def buildProtocol(self, addr):
         protocol = MyServerProtocol(self)
@@ -424,7 +420,7 @@ class MyServerFactory(WebSocketServerFactory):
                 fmatch = match
                 break
 
-        if fmatch == None:
+        if fmatch is None:
             fmatch = Match(self)
             self.matches.append(fmatch)
 
